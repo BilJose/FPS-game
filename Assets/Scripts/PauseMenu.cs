@@ -13,12 +13,13 @@ public class PauseMenu : MonoBehaviour
 
     void start()
     {
+        
         networkManager = NetworkManager.singleton;
     }
     public void LeaveRoom()
     {
-        MatchInfo matchInfo = networkManager.matchInfo;
-        networkManager.matchMaker.DropConnection(matchInfo.networkId, matchInfo.nodeId, 0, networkManager.OnDropConnection);
+        MatchInfo match = networkManager.matchInfo;
+        networkManager.matchMaker.DropConnection(match.networkId, match.nodeId, 0, networkManager.OnDropConnection);
         networkManager.StopHost();
 
     }

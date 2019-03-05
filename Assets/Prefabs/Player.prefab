@@ -436,6 +436,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 100
+  kills: 0
   disableOnDeath:
   - {fileID: 236}
   - {fileID: 241}

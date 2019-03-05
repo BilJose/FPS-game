@@ -21,6 +21,11 @@ public class Player : NetworkBehaviour
     [SyncVar]
     private int currtentHealth;
 
+    [SyncVar]
+    public int kills;
+    [SyncVar]
+    private int deaths;
+
     [SerializeField]
     private Behaviour[] disableOnDeath;
     private bool[] wasEnabled;
@@ -63,7 +68,7 @@ public class Player : NetworkBehaviour
         }
         SetDefaults();
     }
-    void Update()
+   /* void Update()
     {
         if (!isLocalPlayer)
             return;
@@ -72,10 +77,10 @@ public class Player : NetworkBehaviour
             RpcTakeDamage(99999);
             
         }
-    }
+    }*/
 
     [ClientRpc]
-    public void RpcTakeDamage(int _amount)
+    public void RpcTakeDamage(int _amount, string _sourceID)
     {
 
         if (isDead)
@@ -86,13 +91,25 @@ public class Player : NetworkBehaviour
         Debug.Log(transform.name + " now has " + currtentHealth + " health.");
         if(currtentHealth<= 0)
         {
-            Die();
+            
+            Die(_sourceID);
         }
+
+
     }
 
-    private void Die()
+    private void Die(string _sourceID)
     {
         isDead = true;
+
+        Player sourcePlayer = GameManager.GetPlayer(_sourceID);
+        if (sourcePlayer != null)
+        {
+            sourcePlayer.kills++;
+        }
+        deaths++;
+        
+        
         for (int i = 0; i < disableOnDeath.Length; i++)
         {
             disableOnDeath[i].enabled = false;
