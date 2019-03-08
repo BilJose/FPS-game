@@ -37,6 +37,11 @@ public class JoinGame : MonoBehaviour
     public void RefreshRoomList()
     {
         ClearRoomList();
+
+        if(networkManager.matchMaker == null)
+        {
+            networkManager.StartMatchMaker();
+        }
         networkManager.matchMaker.ListMatches(0, 20, "", true, 0, 0, OnMatchList);
         status.text = "Loading...";
 
@@ -85,7 +90,33 @@ public class JoinGame : MonoBehaviour
     public void JoinRoom(MatchInfoSnapshot _match)
     {
         networkManager.matchMaker.JoinMatch(_match.networkId, "","","",0,0, networkManager.OnMatchJoined);
-        ClearRoomList();
-        status.text = "Joining";
+        StartCoroutine(WaitForJoin());
+        
     }
+
+    IEnumerator WaitForJoin()
+    {
+        ClearRoomList();
+        
+
+        int countDown = 10;
+        while (countDown > 0)
+        {
+            status.text = "Joining... (" + countDown + ")";
+            yield return new WaitForSeconds(1);
+            countDown--;
+        }
+        status.text = "Failed to connect.";
+        yield return new WaitForSeconds(1);
+        MatchInfo match = networkManager.matchInfo;
+        if (match != null)
+        {
+            networkManager.matchMaker.DropConnection(match.networkId, match.nodeId, 0, networkManager.OnDropConnection);
+            networkManager.StopHost();
+        }
+        RefreshRoomList();
+
+    }
+
+
 }

@@ -7,15 +7,9 @@ public class PlayerShoot : NetworkBehaviour
 {
 
     private const string PLAYER_TAG = "Player";
-
-
     private PlayerWeapon currentWeapon;
-
-
     private WeaponManager weaponManager;
     
-   
-
     [SerializeField]
     private Camera cam;
     [SerializeField]
@@ -30,16 +24,20 @@ public class PlayerShoot : NetworkBehaviour
         }
         weaponManager = GetComponent<WeaponManager>();
     }
-
     void Update()
     {
         currentWeapon = weaponManager.GetCurrentWeapon();
 
         if (PauseMenu.IsOn)
-        {
             return;
+        if (currentWeapon.bullets < currentWeapon.maxBullets)
+        {
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                weaponManager.Reload();
+                return;
+            }
         }
-       
         if(currentWeapon.fireRate <= 0f)
         {
 
@@ -61,7 +59,6 @@ public class PlayerShoot : NetworkBehaviour
         }
 
     }
-
     [Command]
     void CmdOnShoot()
     {
@@ -81,17 +78,25 @@ public class PlayerShoot : NetworkBehaviour
     void RpcDoHitEffect(Vector3 _pos, Vector3 _normal)
     {
        GameObject _hitEffect = (GameObject) Instantiate(weaponManager.GetCurrentGraphics().hitEffectPrefab, _pos, Quaternion.LookRotation(_normal));
-        Destroy(_hitEffect, 2f);
+        Destroy(_hitEffect, 1f);
 
     }
-
     [Client]
     void Shoot()
     {
-        if (!isLocalPlayer)
+        if (!isLocalPlayer || weaponManager.isReloading)
         {
             return;
         }
+
+        if(currentWeapon.bullets <= 0)
+        {
+            weaponManager.Reload();
+            return;
+        }
+
+        currentWeapon.bullets--;
+        Debug.Log("Remaning bullets " + currentWeapon.bullets);
 
         CmdOnShoot();
         RaycastHit _hit;
@@ -104,6 +109,10 @@ public class PlayerShoot : NetworkBehaviour
             CmdOnHit(_hit.point, _hit.normal);
             
         }
+        if(currentWeapon.bullets <= 0)
+        {
+            weaponManager.Reload();
+        }
     }
 
     [Command]
@@ -112,9 +121,6 @@ public class PlayerShoot : NetworkBehaviour
         Debug.Log(_playerID + " has been Shot.");
 
         Player _player = GameManager.GetPlayer(_playerID);
-
-        _player.RpcTakeDamage(_damage, _sourceID);
-
-  
+        _player.RpcTakeDamage(_damage, _sourceID);  
     }
 }

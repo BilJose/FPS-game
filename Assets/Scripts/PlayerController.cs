@@ -59,8 +59,21 @@ public class PlayerController : MonoBehaviour
 
         if (PauseMenu.IsOn)
         {
+            if (Cursor.lockState != CursorLockMode.None)
+               Cursor.lockState = CursorLockMode.None;
+
+            motor.Move(Vector3.zero);
+            motor.Rotate(Vector3.zero);
+            motor.RotateCamera(0f);
             return;
         }
+        if(Cursor.lockState != CursorLockMode.Locked)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+
+
+
 
         RaycastHit _hit;
         if(Physics.Raycast(transform.position, Vector3.down, out _hit, 100f, enviromentMask))

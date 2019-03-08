@@ -13,25 +13,31 @@ public class Player : NetworkBehaviour
         get { return _isDead; }
         protected set { _isDead = value; }
     }
-
+   
 
     [SerializeField]
     private int maxHealth = 100;
     
     [SyncVar]
     private int currtentHealth;
-
-    [SyncVar]
-    public int kills;
-    [SyncVar]
-    private int deaths;
+    
+    public int kills; 
+    public int deaths;
 
     [SerializeField]
     private Behaviour[] disableOnDeath;
     private bool[] wasEnabled;
 
+
     [SerializeField]
     private GameObject[] disableGameObjectOnDeath;
+    public float GetHealthPct()
+    {
+        return (float)currtentHealth / maxHealth;
+    }
+
+    [SyncVar]
+    public string username = "Loading...";
 
     [SerializeField]
     GameObject deathEffect;
@@ -88,7 +94,7 @@ public class Player : NetworkBehaviour
 
         currtentHealth -= _amount;
 
-        Debug.Log(transform.name + " now has " + currtentHealth + " health.");
+        Debug.Log(username + " now has " + currtentHealth + " health.");
         if(currtentHealth<= 0)
         {
             
@@ -106,7 +112,10 @@ public class Player : NetworkBehaviour
         if (sourcePlayer != null)
         {
             sourcePlayer.kills++;
+            GameManager.instance.onPlayerKilledCallback.Invoke(username, sourcePlayer.username);
+
         }
+
         deaths++;
         
         
@@ -134,7 +143,7 @@ public class Player : NetworkBehaviour
             GameManager.instance.SetSceneCameraActive(true);
             GetComponent<PlayerSetup>().playerUIInstance.SetActive(false);
         }
-        Debug.Log(transform.name + " is Dead!");
+        Debug.Log(username + " is Dead!");
 
         StartCoroutine(Respawn());
     }
@@ -149,7 +158,8 @@ public class Player : NetworkBehaviour
 
         yield return new WaitForSeconds(0.1f);
         SetupPlayer();
-        Debug.Log(transform.name + " Respawned");
+        Debug.Log(username + " Respawned");
+        SetDefaults();
     }
     public void SetDefaults()
     {

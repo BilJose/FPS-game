@@ -14,8 +14,9 @@ public class WeaponManager : NetworkBehaviour
 
 
     private PlayerWeapon currentWeapon;
+    private WeaponGraphics currentGraphics;
+    public bool isReloading = false;
 
-    private WeaponGraphics currentGraphics;    
     void Start()
     {
         EquipWeapon(primaryWeapon);
@@ -46,5 +47,41 @@ public class WeaponManager : NetworkBehaviour
         if (isLocalPlayer)
             Util.SetLayerRecursively(_weaponIns, LayerMask.NameToLayer(weaponLayerName));
     }
+    public void Reload()
+    {
+        if (isReloading)
+            return;
 
+
+        StartCoroutine(Reload_Coroutine());
+
+        
+    }
+    private IEnumerator Reload_Coroutine()
+    {
+        Debug.Log("Reloading...");
+        isReloading = true;
+
+        CmdOnReload();
+
+        yield return new WaitForSeconds(currentWeapon.reloadTime);
+        currentWeapon.bullets = currentWeapon.maxBullets;
+
+        isReloading = false;
+    }
+    [Command]
+    void CmdOnReload()
+    {
+        RpcOnReload(); 
+    }
+
+    [ClientRpc]
+    void RpcOnReload()
+    {
+        Animator anim = currentGraphics.GetComponent<Animator>();
+        if (anim != null)
+        {
+            anim.SetTrigger("Reload");
+        }
+    }
 }

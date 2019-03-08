@@ -1,5 +1,4 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 
 [System.Serializable]
 public class PlayerWeapon
@@ -11,8 +10,19 @@ public class PlayerWeapon
 
     public float fireRate = 0f;
 
+    public int maxBullets = 25;
+    [HideInInspector]
+    public int bullets;
+
+
+    public float reloadTime = 1;
+
     public GameObject graphics;
-    
+
+    public PlayerWeapon()
+    {
+        bullets = maxBullets;
+    }
 
 
 }

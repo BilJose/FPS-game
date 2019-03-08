@@ -70,10 +70,11 @@ public class PlayerSetup : NetworkBehaviour
         if (player != null)
         {
             Debug.Log(username + " has joined!");
-            player.transform.name = username;
+            player.username = username;
         }
     }
 
+  
     void SetLayerRecursively(GameObject obj, int newLayer)
     {
         obj.layer = newLayer;
